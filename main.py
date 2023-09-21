@@ -133,5 +133,5 @@ if st.button('Get Forecast'):
         fig = create_plot(btc_data, scaled_predictions)
         st.plotly_chart(fig) 
 
-        plot_predit_data()
+        #plot_predit_data()
 
