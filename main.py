@@ -27,7 +27,7 @@ model = load_model('./LSTM_model.h5')
 
 scaler = joblib.load("./scaler.pkl")
 
-@st.experimental_memo
+@st.cache_data
 def load_data(ticker):
     data = yf.download(ticker, START, TODAY)
     data.reset_index(inplace=True)
