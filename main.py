@@ -8,7 +8,6 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
 from plotly import graph_objs as go
 import joblib
 from datetime import datetime, timedelta
