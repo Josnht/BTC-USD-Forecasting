@@ -11,6 +11,9 @@ from sklearn.preprocessing import MinMaxScaler
 from plotly import graph_objs as go
 import joblib
 from datetime import datetime, timedelta
+import plotly.express as px
+import plotly.graph_objects as go
+
 
 START = "2015-01-01"
 TODAY = date.today().strftime("%Y-%m-%d")
@@ -67,13 +70,13 @@ def preprocess_data(data):
 
 def make_predictions(data, num_days):
     sequence = data['Close'].values  # Assuming 'Close' prices as the sequence
-    sequence = np.array(sequence, dtype=np.float32).reshape(-1, 1)
+    sequence = np.array(sequence, dtype=np.float32).reshape( -1, 1)
     
     predictions = []
     for _ in range(num_days):
         prediction = model.predict(sequence)
         predictions.append(prediction[0, 0])
-        sequence = np.append(sequence[:, 1:], [[prediction[0, 0]]], axis=1)  # Shift the input sequence
+        sequence = np.append(sequence, prediction, axis=1)  # Shift the input sequence
     
     return predictions
 
@@ -94,12 +97,26 @@ def plot_prices(data, predictions):
     return plt
 
 
+def create_plot(btc_data, predictions):
+    fig = px.line(btc_data['Close'], x=btc_data.index, y='Close' ,title='Real and Predicted BTC Prices for the Next 30 Days')
+    predicted_dates = pd.date_range(start=btc_data.index[-1], periods=len(predictions)+1)[1:]
+    fig.add_trace(px.line(x=predicted_dates, y=predictions.flatten()).data[0])
+    return fig
+
+
+def plot_predit_data():
+	fig = go.Figure()
+	fig.add_trace(go.Scatter(x=btc_data['Close'].index, y='Close' ,name='Real and Predicted BTC Prices for the Next 30 Days'))
+	fig.layout.update(title_text='Time Series data with Rangeslider', xaxis_rangeslider_visible=True)
+	st.plotly_chart(fig)
+
+
 if st.button('Get Forecast'):
     st.write('Fetching historical BTC price data...')
     btc_data = fetch_btc_data(forecast_horizon_days + 365)  # Fetch 1-year historical data
     
     if btc_data is not None:
-        st.write('Predicting BTC prices for the next 30 days...')
+        st.write(f'Predicting stock prices for the next {forecast_horizon_days} days for {selected_ticker}...')
         btc_data = preprocess_data(btc_data)
         num_days = forecast_horizon_days
         
@@ -109,11 +126,12 @@ if st.button('Get Forecast'):
 
         #st.write(f'Predicted BTC prices for the next {forecast_horizon_days}:')
         #for day, price in enumerate(scaled_predictions, 1):
-         #   st.write(f'Day {day}: {price:.2f}')
-
-        st.write('Real-time and Predicted Stock Prices:')
-        plot = plot_prices(btc_data, scaled_predictions)
-        st.pyplot(plot)
+           #st.write(f'Day {day}: {price:.2f}')
 
 
+        st.write('Real-time and Predicted BTC Prices:')
+        fig = create_plot(btc_data, scaled_predictions)
+        st.plotly_chart(fig) 
+
+        plot_predit_data()
 
